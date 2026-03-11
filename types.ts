@@ -9,4 +9,5 @@ export interface VideoData {
   saves: string;
   shares: string;
   timeAgo: string;
+  poster?: string; // Add optional poster field
 }

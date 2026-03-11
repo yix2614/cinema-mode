@@ -84,11 +84,12 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
 
   return (
     <main 
-      className="flex-1 h-full relative bg-black overflow-hidden flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.25,0.25,0,1)]"
+      className="flex-1 h-full relative bg-black flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.25,0.25,0,1)]"
       onWheel={handleWheel}
+      style={{ zIndex: 0 }} // Ensure container creates stacking context but sits low
     >
       <div 
-        className="w-full h-full relative overflow-hidden bg-black group transition-all duration-400 ease-[cubic-bezier(0.25,0.25,0,1)]"
+        className="w-full h-full relative overflow-visible bg-black group transition-all duration-400 ease-[cubic-bezier(0.25,0.25,0,1)]"
       >
         <div 
           className="w-full h-full flex flex-col will-change-transform"
@@ -98,7 +99,7 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
           }}
         >
           {VIDEO_LIST.map((video, idx) => (
-            <div key={video.id} className="w-full h-full shrink-0 bg-transparent flex items-center justify-center overflow-hidden relative">
+            <div key={video.id} className="w-full h-full shrink-0 bg-transparent flex items-center justify-center relative overflow-hidden">
               {/* Aspect Ratio Wrapper */}
               <div 
                 className={`relative flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.25,0.25,0,1)] ${isCommentsOpen ? 'rounded-[12px]' : ''}`}
@@ -109,15 +110,16 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                   maxWidth: isCommentsOpen ? 'calc(100% - 32px)' : '100%',
                   maxHeight: isCommentsOpen ? 'calc(100% - 32px)' : '100%',
                   margin: 'auto',
+                  overflow: 'visible', // Allow ambient to spill out of this wrapper specifically
                 }}
               >
                 {/* Ambient Background - render BEHIND the video but inside this wrapper */}
                 <div className="absolute inset-0 flex items-center justify-center -z-10">
                     <div 
-                        className="w-full h-full"
+                        className="w-full h-full relative"
                         style={{ transform: 'scale(1.15)' }}
                     >
-                        <AmbientBackground videoRef={videoRefs.current[idx]} />
+                        <AmbientBackground posterUrl={video.poster || ''} />
                     </div>
                 </div>
                 

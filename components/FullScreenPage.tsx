@@ -88,6 +88,7 @@ const FullScreenPage: React.FC = () => {
       />
       {showComments && (
         <div 
+          className="relative z-10 shrink-0" // Add shrink-0 to prevent compression
           style={{ 
             paddingTop: layout.margin,
             paddingRight: layout.margin,

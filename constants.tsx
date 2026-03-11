@@ -104,7 +104,8 @@ export const VIDEO_LIST: VideoData[] = [
     comments: '12K',
     saves: '45K',
     shares: '18K',
-    timeAgo: '2h ago'
+    timeAgo: '2h ago',
+    poster: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769128347/ssstik.io__boilerroomtv_1769128318966_odpdxo.jpg' // Assuming a poster exists, or use a placeholder
   },
   {
     id: 'dance-video',
@@ -115,7 +116,8 @@ export const VIDEO_LIST: VideoData[] = [
     comments: '45.6K',
     saves: '120K',
     shares: '32K',
-    timeAgo: '45m ago'
+    timeAgo: '45m ago',
+    poster: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769126952/samples/dance-2.jpg'
   },
   {
     id: 'art-of-pictures',
@@ -126,7 +128,8 @@ export const VIDEO_LIST: VideoData[] = [
     comments: '92.4K',
     saves: '540K',
     shares: '67K',
-    timeAgo: '5m ago'
+    timeAgo: '5m ago',
+    poster: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769129310/ssstik.io__artof_pictures_1769129292178_zxswi8.jpg'
   },
   {
     id: 'elephants-video',
@@ -137,6 +140,7 @@ export const VIDEO_LIST: VideoData[] = [
     comments: '15.2K',
     saves: '210K',
     shares: '89K',
-    timeAgo: '1h ago'
+    timeAgo: '1h ago',
+    poster: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769126952/samples/elephants.jpg'
   }
 ];
