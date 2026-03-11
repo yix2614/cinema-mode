@@ -1,0 +1,5 @@
+{
+  "name": "Video Platform UI Frame",
+  "description": "A high-fidelity TikTok-style UI frame featuring a 72px sidebar, a fluid video container with 20px padding, and overlay controls.",
+  "requestFramePermissions": []
+}
