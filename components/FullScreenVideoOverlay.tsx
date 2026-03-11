@@ -3,11 +3,12 @@ import { VideoData } from '../types';
 
 interface FullScreenVideoOverlayProps {
   data: VideoData;
+  className?: string;
 }
 
-const FullScreenVideoOverlay: React.FC<FullScreenVideoOverlayProps> = ({ data }) => {
+const FullScreenVideoOverlay: React.FC<FullScreenVideoOverlayProps> = ({ data, className = '' }) => {
   return (
-    <div className="absolute left-6 bottom-9 right-24 text-white pointer-events-none drop-shadow-lg">
+    <div className={`absolute left-6 bottom-[36px] right-24 text-white pointer-events-none drop-shadow-lg ${className}`}>
       <div className="flex items-center gap-2 mb-2">
         <h3 className="font-bold text-lg cursor-pointer pointer-events-auto hover:opacity-70 transition-opacity">
           {data.author}

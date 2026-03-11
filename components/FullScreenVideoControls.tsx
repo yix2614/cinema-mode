@@ -9,13 +9,14 @@ interface FullScreenVideoControlsProps {
   isFirst?: boolean;
   isLast?: boolean;
   onToggleComments?: () => void;
+  className?: string;
 }
 
 const FullScreenVideoControls: React.FC<FullScreenVideoControlsProps> = ({ 
-  data, onNext, onPrev, isFirst, isLast, onToggleComments 
+  data, onNext, onPrev, isFirst, isLast, onToggleComments, className = '' 
 }) => {
   return (
-    <div className="absolute right-5 bottom-9 flex flex-col items-center">
+    <div className={`absolute right-5 bottom-[36px] flex flex-col items-center ${className}`}>
       <div className="flex flex-col gap-2 items-center bg-white/10 backdrop-blur-md w-[48px] py-2 rounded-full mb-6">
         <button 
           onClick={onPrev}
@@ -42,7 +43,10 @@ const FullScreenVideoControls: React.FC<FullScreenVideoControlsProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-4 w-full">
+      <div 
+        className="flex flex-col items-center gap-4 w-full overflow-y-auto no-scrollbar max-h-[calc(100vh-200px)]"
+        onWheel={(e) => e.stopPropagation()} // Prevent page scroll when scrolling engagement panel
+      >
         <ActionButton icon={<Icons.Like />} label={data.likes} />
         <ActionButton 
           icon={<Icons.Comment />} 
@@ -51,10 +55,9 @@ const FullScreenVideoControls: React.FC<FullScreenVideoControlsProps> = ({
         />
         <ActionButton icon={<Icons.Bookmark />} label={data.saves} />
         <ActionButton icon={<Icons.Share />} label={data.shares} />
-      </div>
-
-      <div className="w-[48px] h-[48px] rounded-full bg-black/40 border-2 border-white/50 overflow-hidden animate-spin-slow mt-2 shadow-lg cursor-pointer">
-        <img src={`https://picsum.photos/seed/${data.id}-music/48/48`} alt="Music" className="w-full h-full object-cover" />
+        <div className="w-[48px] h-[48px] rounded-full bg-black/40 border-2 border-white/50 overflow-hidden animate-spin-slow mt-2 shadow-lg cursor-pointer shrink-0">
+            <img src={`https://picsum.photos/seed/${data.id}-music/48/48`} alt="Music" className="w-full h-full object-cover" />
+        </div>
       </div>
     </div>
   );
@@ -67,7 +70,7 @@ interface ActionButtonProps {
 }
 
 const ActionButton: React.FC<ActionButtonProps> = ({ icon, label, onClick }) => (
-  <div className="flex flex-col items-center gap-1 self-stretch">
+  <div className="flex flex-col items-center gap-1 self-stretch shrink-0">
     <button 
       onClick={onClick}
       className="flex h-[48px] px-[14px] py-[8px] justify-center items-center rounded-full transition-all duration-200 active:scale-90 hover:brightness-125"

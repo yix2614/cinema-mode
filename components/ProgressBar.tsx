@@ -80,7 +80,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
   return (
     <div 
       ref={progressRef}
-      className={`relative h-[4px] bg-white/20 cursor-pointer group touch-none ${className}`}
+      className={`relative h-[4px] hover:h-[8px] bg-white/20 cursor-pointer group/progress touch-none transition-all duration-200 ${className}`}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
@@ -93,7 +93,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
         style={{ width: `${progressPercent}%` }}
       >
         {/* Thumb (only visible on hover or drag) */}
-        <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md transform scale-0 group-hover:scale-100 transition-transform ${isDragging ? 'scale-100' : ''}`} />
+        <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md transform scale-0 group-hover/progress:scale-100 transition-transform duration-200 ${isDragging ? 'scale-100' : ''}`} />
       </div>
     </div>
   );

@@ -82,9 +82,38 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
     }
   };
 
+  const [isControlsVisible, setIsControlsVisible] = useState(true);
+  const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const resetControlsTimeout = () => {
+    setIsControlsVisible(true);
+    if (controlsTimeoutRef.current) {
+      clearTimeout(controlsTimeoutRef.current);
+    }
+    controlsTimeoutRef.current = setTimeout(() => {
+      setIsControlsVisible(false);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = () => {
+      resetControlsTimeout();
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    resetControlsTimeout(); // Initialize timer
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <main 
-      className="flex-1 h-full relative bg-black flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.25,0.25,0,1)]"
+      className={`flex-1 h-full relative bg-black flex items-center justify-center transition-all duration-400 ease-[cubic-bezier(0.25,0.25,0,1)] ${!isControlsVisible ? 'cursor-none' : ''}`}
       onWheel={handleWheel}
       style={{ zIndex: 0 }} // Ensure container creates stacking context but sits low
     >
@@ -158,7 +187,7 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
 
         {/* Top Controls */}
         <div 
-          className="absolute top-0 left-0 right-0 h-[84px] px-6 flex items-center justify-between z-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          className={`absolute top-0 left-0 right-0 h-[84px] px-6 flex items-center justify-between z-40 transition-opacity duration-300 pointer-events-none ${isControlsVisible ? 'opacity-100' : 'opacity-0'}`}
           style={{
             background: 'linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 100%)'
           }}
@@ -192,9 +221,12 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
         />
 
         {/* Controls Layer */}
-        <div className="absolute inset-0 pointer-events-none z-20">
+        <div className={`absolute inset-0 pointer-events-none z-20`}>
           <div className="w-full h-full relative pointer-events-auto">
-            <FullScreenVideoOverlay data={currentVideo} />
+            <FullScreenVideoOverlay 
+                data={currentVideo} 
+                // Removed opacity toggle for clean mode as requested
+            />
             <FullScreenVideoControls 
               data={currentVideo} 
               onNext={handleNext} 
@@ -202,13 +234,14 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
               isFirst={currentIndex === 0}
               isLast={currentIndex === VIDEO_LIST.length - 1}
               onToggleComments={onToggleComments}
+              // Removed opacity toggle for clean mode as requested
             />
           </div>
         </div>
 
         {/* Progress Bar */}
         <div 
-            className="absolute left-[20px] right-[20px] bottom-[16px] z-30"
+            className={`absolute left-[20px] right-[20px] bottom-[16px] z-30 transition-opacity duration-300 ${isControlsVisible ? 'opacity-100' : 'opacity-0'} pointer-events-auto`}
         >
           <ProgressBar 
             currentTime={currentTime}
