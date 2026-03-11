@@ -80,7 +80,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
   return (
     <div 
       ref={progressRef}
-      className={`relative h-[4px] hover:h-[8px] bg-white/20 cursor-pointer group/progress touch-none transition-all duration-200 ${className}`}
+      className={`relative h-[2px] hover:h-[8px] bg-white/20 cursor-pointer group/progress touch-none transition-all duration-200 ${className}`}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >

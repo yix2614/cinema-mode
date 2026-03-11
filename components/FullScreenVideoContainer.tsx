@@ -241,12 +241,13 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
 
         {/* Progress Bar */}
         <div 
-            className={`absolute left-[20px] right-[20px] bottom-[16px] z-30 transition-opacity duration-300 ${isControlsVisible ? 'opacity-100' : 'opacity-0'} pointer-events-auto`}
+            className={`absolute left-[20px] right-[20px] bottom-[16px] z-30 pointer-events-auto`}
         >
           <ProgressBar 
             currentTime={currentTime}
             duration={duration}
             onSeek={handleSeek}
+            // Removed opacity toggle for clean mode as requested
           />
         </div>
       </div>
