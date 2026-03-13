@@ -1,19 +1,23 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { VIDEO_LIST, Icons } from '../constants';
-import VideoControls from './VideoControls';
+import { VIDEO_LIST, Icons } from '../../constants';
 import VideoOverlay from './VideoOverlay';
 
 interface VideoContainerProps {
+  currentIndex: number;
+  onNext: () => void;
+  onPrev: () => void;
   onToggleComments?: () => void;
   onOpenFullScreen?: () => void;
   isFullScreen?: boolean;
 }
 
-const VideoContainer: React.FC<VideoContainerProps> = ({ onToggleComments, onOpenFullScreen, isFullScreen }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+const VideoContainer: React.FC<VideoContainerProps> = ({ currentIndex, onNext, onPrev, onToggleComments, onOpenFullScreen, isFullScreen }) => {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [progress, setProgress] = useState(0); // 0-1
+  const [duration, setDuration] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
 
   const currentVideo = VIDEO_LIST[currentIndex];
 
@@ -28,6 +32,26 @@ const VideoContainer: React.FC<VideoContainerProps> = ({ onToggleComments, onOpe
           if (playPromise !== undefined) {
             playPromise.catch(() => {});
           }
+          const onTimeUpdate = () => {
+            if (video.duration && !Number.isNaN(video.duration)) {
+              setDuration(video.duration);
+              setProgress(video.currentTime / video.duration);
+            }
+          };
+          const onLoadedMetadata = () => {
+            if (video.duration && !Number.isNaN(video.duration)) {
+              setDuration(video.duration);
+            }
+          };
+          video.addEventListener('timeupdate', onTimeUpdate);
+          video.addEventListener('loadedmetadata', onLoadedMetadata);
+          // initial snapshot
+          onTimeUpdate();
+          // cleanup for current video when index changes
+          return () => {
+            video.removeEventListener('timeupdate', onTimeUpdate);
+            video.removeEventListener('loadedmetadata', onLoadedMetadata);
+          };
         } else {
           video.pause();
           video.currentTime = 0;
@@ -38,13 +62,13 @@ const VideoContainer: React.FC<VideoContainerProps> = ({ onToggleComments, onOpe
 
   const handleNext = () => {
     if (currentIndex < VIDEO_LIST.length - 1) {
-      setCurrentIndex(prev => prev + 1);
+      onNext();
     }
   };
 
   const handlePrev = () => {
     if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
+      onPrev();
     }
   };
 
@@ -129,24 +153,42 @@ const VideoContainer: React.FC<VideoContainerProps> = ({ onToggleComments, onOpe
           }}
         />
 
-        {/* Fixed UI Components (Controls and Info) */}
-        <div className="absolute inset-0 pointer-events-none z-20">
-          <div className="w-full h-full relative pointer-events-auto">
-            <VideoOverlay data={currentVideo} />
-            <VideoControls 
-              data={currentVideo} 
-              onNext={handleNext} 
-              onPrev={handlePrev} 
-              isFirst={currentIndex === 0}
-              isLast={currentIndex === VIDEO_LIST.length - 1}
-              onToggleComments={onToggleComments}
-            />
+        {/* Fixed Info Overlay (without engagement panel) */}
+        <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden">
+          <div 
+            className="w-full h-full relative pointer-events-auto will-change-transform"
+            style={{
+              transform: `translateY(-${currentIndex * 100}%)`,
+              transition: 'transform 150ms cubic-bezier(0.25, 0.25, 0, 1)'
+            }}
+          >
+            {VIDEO_LIST.map((video) => (
+              <div key={video.id} className="w-full h-full relative">
+                <VideoOverlay data={video} />
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Progress bar fixed at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-white/20 z-30 cursor-pointer">
-          <div className="h-full bg-[#FE2C55] w-1/3 shadow-[0_0_8px_rgba(254,44,85,0.6)]"></div>
+        {/* Progress bar fixed at bottom (real-time) */}
+        <div
+          ref={progressBarRef}
+          className="absolute bottom-0 left-0 right-0 h-[4px] bg-white/20 z-30 cursor-pointer"
+          onClick={(e) => {
+            const bar = progressBarRef.current;
+            const video = videoRefs.current[currentIndex];
+            if (!bar || !video || !duration) return;
+            const rect = bar.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const pct = Math.min(Math.max(x / rect.width, 0), 1);
+            video.currentTime = pct * duration;
+            setProgress(pct);
+          }}
+        >
+          <div
+            className="h-full bg-[#FE2C55] shadow-[0_0_8px_rgba(254,44,85,0.6)]"
+            style={{ width: `${Math.round(progress * 100)}%` }}
+          ></div>
         </div>
       </div>
     </main>

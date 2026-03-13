@@ -41,18 +41,18 @@ const FullScreenPage: React.FC = () => {
         // Standard
         cols = 12;
         gap = 8;
-        margin = 8;
+        margin = 16; // Margin is 16px for 840 <= width < 1201
         panelCols = 4;
       } else {
         // Small-Medium (and below)
         cols = 12;
         gap = 8;
-        margin = 8;
+        margin = 8; // Margin is 8px for width < 840
         panelCols = 4;
       }
 
       // Calculate panel width
-      const availableWidth = width;
+      const availableWidth = width - (2 * margin);
       const totalGapWidth = (cols - 1) * gap;
       const colWidth = (availableWidth - totalGapWidth) / cols;
       const panelWidth = (colWidth * panelCols) + ((panelCols - 1) * gap);
@@ -66,8 +66,17 @@ const FullScreenPage: React.FC = () => {
   }, []);
 
   const toggleComments = () => {
-    setShowComments(prev => !prev);
+    // If opening, set state directly
+    if (!showComments) {
+        setShowComments(true);
+        return;
+    } 
+    
+    // If closing, trigger closing animation
+    setIsClosing(true);
   };
+
+  const [isClosing, setIsClosing] = useState(false);
 
   return (
     <div 
@@ -78,8 +87,6 @@ const FullScreenPage: React.FC = () => {
         gap: showComments ? layout.gap : 0,
         paddingTop: 0,
         paddingBottom: 0,
-        // Removed minWidth: '600px' to prevent forced horizontal scroll
-        // overflowX: 'auto', // Removed overflowX to prevent horizontal scroll
       }}
     >
       <FullScreenVideoContainer 
@@ -91,13 +98,18 @@ const FullScreenPage: React.FC = () => {
           className="relative z-10 shrink-0" // Add shrink-0 to prevent compression
           style={{ 
             paddingTop: layout.margin,
-            paddingRight: layout.margin,
+            paddingRight: layout.margin, // Right padding for comment panel
             paddingBottom: layout.margin
           }}
         >
           <FullScreenCommentPanel 
             onClose={() => setShowComments(false)} 
             width={layout.panelWidth}
+            isClosing={isClosing}
+            onCloseAnimationComplete={() => {
+                setShowComments(false);
+                setIsClosing(false);
+            }}
           />
         </div>
       )}

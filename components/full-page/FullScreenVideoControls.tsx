@@ -1,6 +1,6 @@
 import React from 'react';
-import { Icons } from '../constants';
-import { VideoData } from '../types';
+import { Icons } from '../../constants';
+import { VideoData } from '../../types';
 
 interface FullScreenVideoControlsProps {
   data: VideoData;

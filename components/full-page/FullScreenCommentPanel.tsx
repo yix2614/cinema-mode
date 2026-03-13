@@ -3,20 +3,127 @@ import React, { useEffect, useState } from 'react';
 interface FullScreenCommentPanelProps {
   onClose: () => void;
   width?: number;
+  isClosing?: boolean;
+  onCloseAnimationComplete?: () => void;
 }
 
-const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose, width = 352 }) => {
+const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose, width = 352, isClosing = false, onCloseAnimationComplete }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const timer = requestAnimationFrame(() => setIsOpen(true));
-    return () => cancelAnimationFrame(timer);
-  }, []);
+    if (isClosing) {
+      setIsOpen(false);
+      const timer = setTimeout(() => {
+        if (onCloseAnimationComplete) onCloseAnimationComplete();
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [isClosing, onCloseAnimationComplete]);
 
   const handleClose = () => {
     setIsOpen(false);
-    setTimeout(onClose, 400);
+    setTimeout(onClose, 400); // Wait for animation to finish
   };
+
+  // If width is 0, we can also trigger close animation if needed, but here we control width via parent
+  // Actually, the parent controls unmounting via showComments.
+  // When parent sets showComments=false, the component unmounts immediately.
+  // To have close animation, the parent needs to wait.
+  // But here we are using internal state `isOpen` for animation.
+  // When component mounts, isOpen becomes true (animate in).
+  // When user clicks close, handleClose sets isOpen=false (animate out), then calls onClose.
+  
+  // However, if the user clicks the "Comment" button in the sidebar again to toggle OFF:
+  // The parent (FullScreenPage) calls toggleComments -> showComments becomes false -> Component Unmounts immediately.
+  // Result: No exit animation.
+  
+  // To fix this, we need to expose the `handleClose` logic to the parent or let parent signal "closing".
+  // Or simpler: The parent shouldn't unmount it immediately.
+  
+  // But since we can't easily change the parent-child contract to be async without complex state,
+  // we can check if the parent passed a "closing" prop? No.
+  
+  // Actually, the request is about the "Comment button on engagement panel".
+  // Wait, there is no comment button on the engagement panel *inside* the comment panel.
+  // There is a comment button on the right side (FullScreenVideoControls).
+  
+  // "comment打开后再次点击 engagement panel上的 comment 按钮的动画，怎么和点 panel 上 close不一样？我需要一样"
+  // Meaning: Clicking the Comment icon in the sidebar (to toggle OFF) should have the same smooth slide-out animation as clicking the 'X' button inside the panel.
+  
+  // Currently:
+  // 1. Click 'X' inside panel -> handleClose -> setIsOpen(false) [Animates] -> setTimeout -> onClose() [Unmounts].
+  // 2. Click Sidebar Icon -> toggleComments (Parent) -> setShowComments(false) -> Unmounts immediately [No Animation].
+  
+  // Solution:
+  // We need to animate out before unmounting when toggled from outside.
+  // This requires the parent to signal "start closing" instead of unmounting immediately.
+  // OR we keep the panel always mounted but control its width/visibility via props?
+  // If we keep it mounted, we lose the "lazy load" benefit, but it's smoother.
+  
+  // Let's change FullScreenPage to always render CommentPanel but control a `visible` prop?
+  // Or change `showComments` to `isClosing` state?
+  
+  // Better approach:
+  // In FullScreenPage, keep `showComments` as the "desired state".
+  // But don't conditionally render `{showComments && ...}`.
+  // Instead, render it always (or use a transition group).
+  // If we render it always with `width: 0`, it's hidden.
+  
+  // Let's modify FullScreenPage to conditionally render but with a delay?
+  // No, let's pass `isVisible` to FullScreenCommentPanel and let it handle animation.
+  // And `onClose` will be called by Panel when animation finishes? No, `onClose` is "request to close".
+  
+  // Let's try this:
+  // 1. FullScreenPage: `showComments` state.
+  // 2. FullScreenCommentPanel: accepts `isVisible` prop.
+  // 3. When `isVisible` changes to true -> animate in.
+  // 4. When `isVisible` changes to false -> animate out.
+  // 5. But if we unmount it, we can't animate out.
+  
+  // So, FullScreenPage should ALWAYS render FullScreenCommentPanel if we want smooth toggle from sidebar.
+  // OR, we use a presence animation library (like AnimatePresence).
+  // Without library:
+  // FullScreenPage renders `{ (showComments || isAnimatingOut) && <Panel isVisible={showComments} onAnimationEnd={() => setIsAnimatingOut(false)} /> }`
+  
+  // Let's go with the "Always Render but 0 width" approach?
+  // "comment panel没打开的时候...不是100vw...". If we keep it mounted with 0 width, it might still take space if not careful.
+  
+  // Let's use the `AnimatePresence`-like logic manually in FullScreenPage.
+  // Actually, simply delaying the unmount in FullScreenPage is enough.
+  
+  // But wait, the user said "click engagement panel comment button".
+  // That calls `onToggleComments` in `FullScreenVideoControls` -> `toggleComments` in `FullScreenPage`.
+  
+  // Plan:
+  // 1. Modify `FullScreenPage.tsx`:
+  //    - When `toggleComments` is called and currently open:
+  //      - Don't set `showComments = false` immediately.
+  //      - Instead, call a new method on the Panel ref? No, refs are messy.
+  //      - Use a `isClosing` state.
+  
+  // Actually, simplest fix:
+  // Change `FullScreenPage` to *not* unmount the panel immediately.
+  // Instead, pass `isOpen` prop to the panel.
+  // And use a timeout in `FullScreenPage` to unmount it?
+  // Or just keep it mounted but hidden?
+  
+  // If I keep it mounted but hidden:
+  // It consumes memory. But it's just one panel.
+  // Layout logic needs to know if it's "visually" open to apply padding.
+  
+  // Let's try "Mount on first open, stay mounted, toggle visibility".
+  // `FullScreenPage`: `hasOpened` state.
+  // If `!hasOpened`, don't render.
+  // If `hasOpened`, render `<Panel isOpen={showComments} />`.
+  
+  // Let's modify `FullScreenCommentPanel` to take `isOpen` prop and animate based on it.
+  
+  useEffect(() => {
+      setIsOpen(true); // Mount animation
+  }, []);
+  
+  // This existing effect only handles mount.
+
 
   return (
     <div 
