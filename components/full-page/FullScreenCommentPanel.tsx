@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
+import { VideoData } from '../../types';
+import { commentPanelClasses, commentPanelStyles } from './FullScreenCommentPanel.styles';
 
 interface FullScreenCommentPanelProps {
   onClose: () => void;
   width?: number;
   isClosing?: boolean;
   onCloseAnimationComplete?: () => void;
+  video?: VideoData;
 }
 
-const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose, width = 352, isClosing = false, onCloseAnimationComplete }) => {
+const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose, width = 352, isClosing = false, onCloseAnimationComplete, video }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -127,23 +130,18 @@ const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose
 
   return (
     <div 
-      className="overflow-hidden h-full flex shrink-0"
-      style={{
-        width: isOpen ? width : 0,
-        transition: 'width 400ms cubic-bezier(0.25, 0.25, 0, 1)',
-      }}
+      className={commentPanelClasses.wrapper}
+      style={commentPanelStyles.wrapper(isOpen, width)}
     >
       <div 
-        className="h-full bg-[#F8F8F8] rounded-[20px] flex flex-col shrink-0 overflow-hidden shadow-sm relative"
-        style={{ width: width }}
+        className={commentPanelClasses.container}
+        style={commentPanelStyles.container(width)}
       >
-        <div className="px-5 pt-6 pb-4 flex items-center justify-between shrink-0">
-          <h2 className="text-[18px] font-bold text-[#161823]">
-            Comments <span className="text-[#161823]/50 font-normal ml-1">200</span>
-          </h2>
+        <div className={commentPanelClasses.header}>
+          <h2 className={commentPanelClasses.title}>Comments</h2>
           <button 
             onClick={handleClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-black/5 active:scale-90 transition-all"
+            className={commentPanelClasses.closeBtn}
           >
             <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M14 14L34 34" stroke="#161823" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -152,58 +150,58 @@ const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 scrollbar-hide pb-6">
-          <div className="flex flex-col gap-8 py-2">
+        <div className={commentPanelClasses.content}>
+          <div className={commentPanelClasses.commentList}>
             <CommentItem 
-              avatar="https://picsum.photos/seed/user1/100/100"
+              avatar={`https://picsum.photos/seed/${video?.id || 'user1'}/100/100`}
               name="Alvin_Design"
-              text="The color grading on this video is just phenomenal! Which lut are you using? 🎨✨"
+              text={video ? `Love the vibe — ${video.description?.slice(0, 80) || 'amazing cut!'} ` : "The color grading on this video is just phenomenal! Which lut are you using? 🎨✨"}
               time="2h ago"
               likes="1.5K"
               replies={[
                 {
                   avatar: "https://picsum.photos/seed/user2/100/100",
                   name: "Creator_Dev",
-                  text: "Custom made! I'll share it in the next post.",
+                  text: video ? `Shot by ${video.author}. Will share more details soon.` : "Custom made! I'll share it in the next post.",
                   time: "1h ago",
                   likes: "420"
                 }
               ]}
             />
 
-            <div className="flex gap-3">
-              <img src="https://picsum.photos/seed/user3/100/100" className="w-8 h-8 rounded-full shrink-0" alt="" />
-              <div className="flex-1 flex flex-col gap-1">
-                <span className="text-[14px] font-bold text-[#161823]/60 leading-[130%]">Sarah Jenkins</span>
-                <p className="text-[15px] text-[#161823] leading-[140%]">I tried to recreate this view during my last trip, check this out!</p>
-                <div className="mt-2 w-[164px] h-[220px] rounded-[12px] overflow-hidden bg-gray-200 shadow-sm border border-black/5">
-                  <img src="https://picsum.photos/seed/nature1/400/600" className="w-full h-full object-cover" alt="Nature" />
+            <div className={commentPanelClasses.commentItem.main}>
+              <img src={`https://picsum.photos/seed/${(video?.id || 'user3') + '-alt'}/100/100`} className={commentPanelClasses.commentItem.avatar} alt="" />
+              <div className={commentPanelClasses.commentItem.content}>
+                <span className={commentPanelClasses.commentItem.name}>Sarah Jenkins</span>
+                <p className={commentPanelClasses.commentItem.text}>{video ? `Tried to recreate ${video.author}'s mood — thoughts?` : 'I tried to recreate this view during my last trip, check this out!'}</p>
+                <div className={`${commentPanelClasses.commentItem.customImageWrapper} w-[164px] h-[220px]`}>
+                  <img src={`https://picsum.photos/seed/${(video?.id || 'nature1') + '-img'}/400/600`} className={commentPanelClasses.commentItem.customImage} alt="Nature" />
                 </div>
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="text-[12px] text-[#161823]/40">6-2</span>
-                  <button className="text-[12px] font-bold text-[#161823]/60 hover:underline">Reply</button>
-                  <div className="ml-auto flex items-center gap-1">
+                <div className={commentPanelClasses.commentItem.meta}>
+                  <span className={commentPanelClasses.commentItem.time}>6-2</span>
+                  <button className={commentPanelClasses.commentItem.replyBtn}>Reply</button>
+                  <div className={commentPanelClasses.commentItem.likes}>
                     <HeartIcon className="w-4 h-4 text-[#161823]/40" />
-                    <span className="text-[12px] text-[#161823]/40">892</span>
+                    <span className={commentPanelClasses.commentItem.time}>892</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <img src="https://picsum.photos/seed/user4/100/100" className="w-8 h-8 rounded-full shrink-0" alt="" />
-              <div className="flex-1 flex flex-col gap-1">
-                <span className="text-[14px] font-bold text-[#161823]/60 leading-[130%]">CatLover99</span>
-                <p className="text-[15px] text-[#161823] leading-[140%]">Reminds me of my sleepy buddy while watching this... 🐱💤</p>
-                <div className="mt-2 w-[164px] h-[164px] rounded-[12px] overflow-hidden bg-gray-200 border border-black/5">
-                  <img src="https://res.cloudinary.com/dkjokhb4w/image/upload/v1741082531/cat_u66xun.png" className="w-full h-full object-cover" alt="Cat" />
+            <div className={commentPanelClasses.commentItem.main}>
+              <img src={`https://picsum.photos/seed/${(video?.id || 'user4') + '-x'}/100/100`} className={commentPanelClasses.commentItem.avatar} alt="" />
+              <div className={commentPanelClasses.commentItem.content}>
+                <span className={commentPanelClasses.commentItem.name}>CatLover99</span>
+                <p className={commentPanelClasses.commentItem.text}>{video ? `Watching ${video.author} made me think of my sleepy buddy... 🐱💤` : 'Reminds me of my sleepy buddy while watching this... 🐱💤'}</p>
+                <div className={`${commentPanelClasses.commentItem.customImageWrapper} w-[164px] h-[164px]`}>
+                  <img src={`https://picsum.photos/seed/${(video?.id || 'cat') + '-cat'}/400/400`} className={commentPanelClasses.commentItem.customImage} alt="Cat" />
                 </div>
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="text-[12px] text-[#161823]/40">4h ago</span>
-                  <button className="text-[12px] font-bold text-[#161823]/60 hover:underline">Reply</button>
-                  <div className="ml-auto flex items-center gap-1">
+                <div className={commentPanelClasses.commentItem.meta}>
+                  <span className={commentPanelClasses.commentItem.time}>4h ago</span>
+                  <button className={commentPanelClasses.commentItem.replyBtn}>Reply</button>
+                  <div className={commentPanelClasses.commentItem.likes}>
                     <HeartIcon className="w-4 h-4 text-[#161823]/40" />
-                    <span className="text-[12px] text-[#161823]/40">126</span>
+                    <span className={commentPanelClasses.commentItem.time}>126</span>
                   </div>
                 </div>
               </div>
@@ -217,20 +215,20 @@ const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose
               likes="34"
             />
 
-            <div className="flex gap-3">
-              <img src="https://picsum.photos/seed/user6/100/100" className="w-8 h-8 rounded-full shrink-0" alt="" />
-              <div className="flex-1 flex flex-col gap-1">
-                <span className="text-[14px] font-bold text-[#161823]/60 leading-[130%]">Archy_Vibes</span>
-                <p className="text-[15px] text-[#161823] leading-[140%]">The scale of these cliffs is insane. Reminded me of this project I worked on.</p>
-                <div className="mt-2 w-[164px] h-[120px] rounded-[12px] overflow-hidden bg-gray-200 border border-black/5">
-                  <img src="https://picsum.photos/seed/architecture/400/300" className="w-full h-full object-cover" alt="Architecture" />
+            <div className={commentPanelClasses.commentItem.main}>
+              <img src="https://picsum.photos/seed/user6/100/100" className={commentPanelClasses.commentItem.avatar} alt="" />
+              <div className={commentPanelClasses.commentItem.content}>
+                <span className={commentPanelClasses.commentItem.name}>Archy_Vibes</span>
+                <p className={commentPanelClasses.commentItem.text}>The scale of these cliffs is insane. Reminded me of this project I worked on.</p>
+                <div className={`${commentPanelClasses.commentItem.customImageWrapper} w-[164px] h-[120px]`}>
+                  <img src="https://picsum.photos/seed/architecture/400/300" className={commentPanelClasses.commentItem.customImage} alt="Architecture" />
                 </div>
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="text-[12px] text-[#161823]/40">Yesterday</span>
-                  <button className="text-[12px] font-bold text-[#161823]/60 hover:underline">Reply</button>
-                  <div className="ml-auto flex items-center gap-1">
+                <div className={commentPanelClasses.commentItem.meta}>
+                  <span className={commentPanelClasses.commentItem.time}>Yesterday</span>
+                  <button className={commentPanelClasses.commentItem.replyBtn}>Reply</button>
+                  <div className={commentPanelClasses.commentItem.likes}>
                     <HeartIcon className="w-4 h-4 text-[#161823]/40" />
-                    <span className="text-[12px] text-[#161823]/40">56</span>
+                    <span className={commentPanelClasses.commentItem.time}>56</span>
                   </div>
                 </div>
               </div>
@@ -239,21 +237,21 @@ const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose
           </div>
         </div>
 
-        <div className="p-4 bg-[#F8F8F8] border-t border-black/5 shrink-0">
-          <div className="flex items-center gap-2">
-            <img src="https://picsum.photos/seed/currentuser/100/100" className="w-8 h-8 rounded-full shrink-0 bg-gray-200" alt="Me" />
-            <div className="flex-1 relative flex items-center bg-[#F1F1F2] rounded-full px-4 h-[40px]">
+        <div className={commentPanelClasses.footer}>
+          <div className={commentPanelClasses.inputWrapper}>
+            <img src="https://picsum.photos/seed/currentuser/100/100" className={commentPanelClasses.commentItem.avatar} alt="Me" />
+            <div className={commentPanelClasses.inputContainer}>
               <input 
                 type="text" 
                 placeholder="Add comment..." 
-                className="bg-transparent border-none outline-none flex-1 text-[14px] placeholder:text-[#161823]/40"
+                className={commentPanelClasses.input}
               />
-              <div className="flex items-center gap-3 text-[#161823]/60 text-[18px]">
+              <div className={commentPanelClasses.inputActions}>
                 <button className="hover:scale-110 transition-transform">@</button>
                 <button className="hover:scale-110 transition-transform text-[16px]">😊</button>
               </div>
             </div>
-            <button className="w-8 h-8 bg-[#FE2C55]/20 flex items-center justify-center rounded-full text-[#FE2C55] hover:bg-[#FE2C55]/30 transition-colors">
+            <button className={commentPanelClasses.submitBtn}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 4V20M12 4L4 12M12 4L20 12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -274,33 +272,33 @@ const CommentItem: React.FC<{
   replyTo?: string;
   replies?: any[];
 }> = ({ avatar, name, text, time, likes, replies, replyTo }) => (
-  <div className="flex flex-col gap-3">
-    <div className="flex gap-3">
-      <img src={avatar} className="w-8 h-8 rounded-full shrink-0 bg-gray-200" alt="" />
-      <div className="flex-1 flex flex-col gap-1">
-        <span className="text-[14px] font-bold text-[#161823]/60 leading-[130%]">{name}</span>
-        <p className="text-[15px] text-[#161823] leading-[140%]">
-          {replyTo && <span className="font-bold text-[#161823]/60 mr-1">▶ {replyTo}</span>}
+  <div className={commentPanelClasses.commentItem.wrapper}>
+    <div className={commentPanelClasses.commentItem.main}>
+      <img src={avatar} className={commentPanelClasses.commentItem.avatar} alt="" />
+      <div className={commentPanelClasses.commentItem.content}>
+        <span className={commentPanelClasses.commentItem.name}>{name}</span>
+        <p className={commentPanelClasses.commentItem.text}>
+          {replyTo && <span className={commentPanelClasses.commentItem.replyTo}>▶ {replyTo}</span>}
           {text}
         </p>
-        <div className="flex items-center gap-4 mt-1">
-          <span className="text-[12px] text-[#161823]/40">{time}</span>
-          <button className="text-[12px] font-bold text-[#161823]/60 hover:underline">Reply</button>
-          <div className="ml-auto flex items-center gap-1">
+        <div className={commentPanelClasses.commentItem.meta}>
+          <span className={commentPanelClasses.commentItem.time}>{time}</span>
+          <button className={commentPanelClasses.commentItem.replyBtn}>Reply</button>
+          <div className={commentPanelClasses.commentItem.likes}>
             <HeartIcon className="w-4 h-4 text-[#161823]/40" />
-            <span className="text-[12px] text-[#161823]/40">{likes}</span>
+            <span className={commentPanelClasses.commentItem.time}>{likes}</span>
           </div>
         </div>
       </div>
     </div>
     
     {replies && replies.length > 0 && (
-      <div className="ml-[44px] flex flex-col gap-5 mt-2">
+      <div className={commentPanelClasses.commentItem.repliesWrapper}>
         {replies.map((reply, i) => (
           <CommentItem key={i} {...reply} />
         ))}
-        <button className="text-[12px] font-bold text-[#161823]/40 text-left flex items-center gap-2 group">
-          <div className="w-[12px] h-[1px] bg-[#161823]/10 group-hover:bg-[#161823]/30 transition-colors"></div>
+        <button className={commentPanelClasses.commentItem.viewMoreBtn}>
+          <div className={commentPanelClasses.commentItem.viewMoreLine}></div>
           View more replies <ChevronDownIcon className="w-3 h-3" />
         </button>
       </div>

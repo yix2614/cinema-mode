@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { progressBarClasses, progressBarStyles } from './ProgressBar.styles';
 
 interface ProgressBarProps {
   currentTime: number;
@@ -80,20 +81,20 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ currentTime, duration, onSeek
   return (
     <div 
       ref={progressRef}
-      className={`relative h-[2px] hover:h-[8px] bg-white/20 cursor-pointer group/progress touch-none transition-all duration-200 ${className}`}
+      className={progressBarClasses.container(className)}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
       {/* Hover area to make it easier to click */}
-      <div className="absolute -top-2 -bottom-2 left-0 right-0 z-10" />
+      <div className={progressBarClasses.hoverArea} />
       
       {/* Progress Track */}
       <div 
-        className="h-full bg-[#FE2C55] shadow-[0_0_8px_rgba(254,44,85,0.6)] relative pointer-events-none transition-[width] duration-75 ease-linear"
-        style={{ width: `${progressPercent}%` }}
+        className={progressBarClasses.track}
+        style={progressBarStyles.track(progressPercent)}
       >
         {/* Thumb (only visible on hover or drag) */}
-        <div className={`absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-md transform scale-0 group-hover/progress:scale-100 transition-transform duration-200 ${isDragging ? 'scale-100' : ''}`} />
+        <div className={progressBarClasses.thumb(isDragging)} />
       </div>
     </div>
   );

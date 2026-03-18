@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icons } from '../../constants';
 import { VideoData } from '../../types';
+import { videoOverlayClasses, videoOverlayStyles } from './FullScreenVideoOverlay.styles';
 
 interface FullScreenVideoOverlayProps {
   data: VideoData;
@@ -8,18 +9,28 @@ interface FullScreenVideoOverlayProps {
 }
 
 const FullScreenVideoOverlay: React.FC<FullScreenVideoOverlayProps> = ({ data, className = '' }) => {
+  const [isSmall, setIsSmall] = useState(false);
+  useEffect(() => {
+    const update = () => setIsSmall(window.innerWidth < 840);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   return (
-    <div className={`absolute left-6 bottom-[36px] right-24 text-white pointer-events-none drop-shadow-lg ${className}`}>
-      <div className="flex items-center gap-2 mb-2">
-        <h3 className="font-bold text-lg cursor-pointer pointer-events-auto hover:opacity-70 transition-opacity">
-          {data.author}
-        </h3>
-        <span className="text-white/80 text-sm font-medium">• {data.timeAgo}</span>
-      </div>
-      <div className="max-w-[560px] pointer-events-auto">
-        <p className="text-[15px] font-normal truncate leading-relaxed text-[#F0F0F0]">
-          {data.description}
-        </p>
+    <div className={videoOverlayClasses.container(className)}>
+      <div className={videoOverlayClasses.inner} style={videoOverlayStyles.inner(isSmall)}>
+        <div className={videoOverlayClasses.header}>
+          <h3 className={videoOverlayClasses.author}>
+            {data.author}
+          </h3>
+          <span className={videoOverlayClasses.time}>• {data.timeAgo}</span>
+        </div>
+        <div className={videoOverlayClasses.descriptionWrapper}>
+          <p className={videoOverlayClasses.description}>
+            {data.description}
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import FullScreenCommentPanel from './FullScreenCommentPanel';
 import FullScreenVideoContainer from './FullScreenVideoContainer';
+import { VIDEO_LIST } from '../../constants';
+import { VideoData } from '../../types';
 
 interface LayoutConfig {
   margin: number;
@@ -10,6 +12,7 @@ interface LayoutConfig {
 
 const FullScreenPage: React.FC = () => {
   const [showComments, setShowComments] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<VideoData | undefined>(VIDEO_LIST[0]);
   const [layout, setLayout] = useState<LayoutConfig>({
     margin: 16,
     gap: 16,
@@ -18,8 +21,7 @@ const FullScreenPage: React.FC = () => {
 
   useEffect(() => {
     const calculateLayout = () => {
-      // Enforce minimum width of 600px for layout calculations
-      const width = Math.max(window.innerWidth, 600);
+      const width = window.innerWidth;
       let margin = 16;
       let gap = 16;
       let cols = 24;
@@ -55,7 +57,7 @@ const FullScreenPage: React.FC = () => {
       const availableWidth = width - (2 * margin);
       const totalGapWidth = (cols - 1) * gap;
       const colWidth = (availableWidth - totalGapWidth) / cols;
-      const panelWidth = (colWidth * panelCols) + ((panelCols - 1) * gap);
+      const panelWidth = Math.max((colWidth * panelCols) + ((panelCols - 1) * gap), 288);
 
       setLayout({ margin, gap, panelWidth });
     };
@@ -92,20 +94,22 @@ const FullScreenPage: React.FC = () => {
       <FullScreenVideoContainer 
         onToggleComments={toggleComments} 
         isCommentsOpen={showComments}
+        onCurrentVideoChange={(video) => setCurrentVideo(video)}
       />
       {showComments && (
         <div 
-          className="relative z-10 shrink-0" // Add shrink-0 to prevent compression
+          className="relative z-10 shrink-0"
           style={{ 
-            paddingTop: layout.margin,
-            paddingRight: layout.margin, // Right padding for comment panel
-            paddingBottom: layout.margin
+            paddingTop: window.innerWidth >= 1201 ? layout.margin : 8,
+            paddingRight: window.innerWidth >= 1201 ? layout.margin : 8,
+            paddingBottom: window.innerWidth >= 1201 ? layout.margin : 8
           }}
         >
           <FullScreenCommentPanel 
             onClose={() => setShowComments(false)} 
             width={layout.panelWidth}
             isClosing={isClosing}
+            video={currentVideo}
             onCloseAnimationComplete={() => {
                 setShowComments(false);
                 setIsClosing(false);
