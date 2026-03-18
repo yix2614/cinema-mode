@@ -144,8 +144,8 @@ const FullScreenCommentPanel: React.FC<FullScreenCommentPanelProps> = ({ onClose
             className={commentPanelClasses.closeBtn}
           >
             <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M14 14L34 34" stroke="#161823" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M34 14L14 34" stroke="#161823" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M14 14L34 34" stroke="#F6F6F6" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M34 14L14 34" stroke="#F6F6F6" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
         </div>

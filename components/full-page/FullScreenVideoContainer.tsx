@@ -228,6 +228,40 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
               {/* Slide-scoped overlays: description, engagement, progress bar */}
               <div className={videoContainerClasses.overlayContainer}>
                 <div className={videoContainerClasses.overlayInner}>
+                  {/* Top Controls - Now inside slide-scoped overlay so it scrolls with feed */}
+                  <div 
+                    className={videoContainerClasses.topControls(isControlsVisible)}
+                    style={videoContainerStyles.topControls}
+                  >
+                    <div className={videoContainerClasses.topControlsLeft}>
+                      <button 
+                        className={videoContainerClasses.iconBtn}
+                        onClick={() => {
+                          setIsMounting(false);
+                          setEntered(false);
+                          requestAnimationFrame(() => {
+                            setTimeout(() => navigate('/'), EXIT_DURATION);
+                          });
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path d="M12.3616 2.95071C12.5243 2.78799 12.7887 2.78799 12.9515 2.95071L13.7171 3.71634C13.8798 3.87906 13.8798 4.14346 13.7171 4.30618L8.02274 10.0005L13.7171 15.6949C13.8797 15.8576 13.8798 16.121 13.7171 16.2837L12.9515 17.0493C12.7887 17.2121 12.5243 17.2121 12.3616 17.0493L5.60673 10.2945C5.44428 10.1318 5.44421 9.86825 5.60673 9.7056L12.3616 2.95071Z" fill="#F6F6F6"/>
+                        </svg>
+                      </button>
+                      <button className={videoContainerClasses.iconBtn}>
+                        <Icons.Volume width={20} height={20} />
+                      </button>
+                    </div>
+                    <div className={videoContainerClasses.topControlsRight}>
+                      <button className={videoContainerClasses.iconBtn}>
+                        <Icons.Maximize width={20} height={20} />
+                      </button>
+                      <button className={videoContainerClasses.iconBtn}>
+                        <Icons.More width={20} height={20} />
+                      </button>
+                    </div>
+                  </div>
+
                   <FullScreenVideoOverlay data={video} />
                   <FullScreenVideoControls 
                     data={video}
@@ -252,40 +286,6 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
             </div>
           );
           })}
-        </div>
-
-        {/* Top Controls (kept fixed) */}
-        <div 
-          className={videoContainerClasses.topControls(isControlsVisible)}
-          style={videoContainerStyles.topControls}
-        >
-          <div className={videoContainerClasses.topControlsLeft}>
-            <button 
-              className={videoContainerClasses.iconBtn}
-              onClick={() => {
-                setIsMounting(false);
-                setEntered(false);
-                requestAnimationFrame(() => {
-                  setTimeout(() => navigate('/'), EXIT_DURATION);
-                });
-              }}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M12.3616 2.95071C12.5243 2.78799 12.7887 2.78799 12.9515 2.95071L13.7171 3.71634C13.8798 3.87906 13.8798 4.14346 13.7171 4.30618L8.02274 10.0005L13.7171 15.6949C13.8797 15.8576 13.8798 16.121 13.7171 16.2837L12.9515 17.0493C12.7887 17.2121 12.5243 17.2121 12.3616 17.0493L5.60673 10.2945C5.44428 10.1318 5.44421 9.86825 5.60673 9.7056L12.3616 2.95071Z" fill="#F6F6F6"/>
-              </svg>
-            </button>
-            <button className={videoContainerClasses.iconBtn}>
-              <Icons.Volume width={20} height={20} />
-            </button>
-          </div>
-          <div className={videoContainerClasses.topControlsRight}>
-            <button className={videoContainerClasses.iconBtn}>
-              <Icons.Maximize width={20} height={20} />
-            </button>
-            <button className={videoContainerClasses.iconBtn}>
-              <Icons.More width={20} height={20} />
-            </button>
-          </div>
         </div>
 
         {/* Bottom Gradient */}

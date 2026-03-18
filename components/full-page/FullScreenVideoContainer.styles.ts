@@ -36,6 +36,9 @@ export const videoContainerStyles = {
     aspectRatio: ratio ? ratio : 'auto',
     width: ratio ? (ratio > 1 ? '100%' : 'auto') : '100%',
     height: ratio ? (ratio > 1 ? 'auto' : '100%') : '100%',
+    maxWidth: isCommentsOpen 
+      ? (innerWidth >= 1201 ? 'calc(100% - 32px)' : 'calc(100% - 16px)')
+      : '100%',
     maxHeight: isCommentsOpen 
       ? (innerWidth >= 1201 ? 'calc(100% - 32px)' : 'calc(100% - 16px)')
       : '100%',
@@ -52,7 +55,7 @@ export const videoContainerStyles = {
     width: ratio ? (ratio > 1 ? '100%' : 'auto') : '100%',
     height: ratio ? (ratio > 1 ? 'auto' : '100%') : '100%',
     maxWidth: isCommentsOpen 
-      ? (innerWidth >= 1201 ? 'calc(100% - 16px)' : 'calc(100% - 8px)')
+      ? (innerWidth >= 1201 ? 'calc(100% - 32px)' : 'calc(100% - 16px)')
       : '100%',
     maxHeight: isCommentsOpen 
       ? (innerWidth >= 1201 ? 'calc(100% - 32px)' : 'calc(100% - 16px)')
