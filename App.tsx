@@ -2,13 +2,19 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Sidebar from './components/home/Sidebar';
+import FollowingPage from './components/home/FollowingPage';
+import SettingsDialog from './components/home/SettingsDialog';
 import VideoContainer from './components/home/VideoContainer';
 import CommentPanel from './components/home/CommentPanel';
 import VideoControls from './components/home/VideoControls';
 import { VIDEO_LIST } from './constants';
 import FullScreenPage from './components/full-page/FullScreenPage';
 
-const MainPage: React.FC = () => {
+interface MainPageProps {
+  onOpenSettings: () => void;
+}
+
+const MainPage: React.FC<MainPageProps> = ({ onOpenSettings }) => {
   const [showComments, setShowComments] = useState(false);
   const navigate = useNavigate();
 
@@ -26,7 +32,7 @@ const MainPage: React.FC = () => {
 
   return (
     <div className="flex h-screen w-screen bg-white text-[#161823] font-sans overflow-hidden">
-      <Sidebar />
+      <Sidebar onOpenSettings={onOpenSettings} />
       <div className="flex-1 flex p-4 gap-4 overflow-hidden">
         <VideoContainer
           currentIndex={currentIndex}
@@ -65,11 +71,17 @@ const MainPage: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  const [showSettings, setShowSettings] = useState(false);
+
   return (
-    <Routes>
-      <Route path="/" element={<MainPage />} />
-      <Route path="/full-screen" element={<FullScreenPage />} />
-    </Routes>
+    <>
+      <Routes>
+        <Route path="/" element={<MainPage onOpenSettings={() => setShowSettings(true)} />} />
+        <Route path="/following" element={<FollowingPage onOpenSettings={() => setShowSettings(true)} />} />
+        <Route path="/full-screen" element={<FullScreenPage />} />
+      </Routes>
+      <SettingsDialog visible={showSettings} onClose={() => setShowSettings(false)} />
+    </>
   );
 };
 

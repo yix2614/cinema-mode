@@ -1,0 +1,13 @@
+
+.tux-button-border-fix button {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.tux-button-border-fix .tux-button__element {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+

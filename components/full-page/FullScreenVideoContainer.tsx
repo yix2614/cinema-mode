@@ -7,6 +7,7 @@ import FullScreenVideoOverlay from './FullScreenVideoOverlay';
 import AmbientBackground from './AmbientBackground';
 import ProgressBar from './ProgressBar';
 import { videoContainerClasses, videoContainerStyles } from './FullScreenVideoContainer.styles';
+import { TUXIconButton } from '@byted-tiktok/tux-web';
 
 const EASE = 'cubic-bezier(0.25,0,0.25,1)';
 const ENTER_DURATION = 300;
@@ -100,6 +101,7 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
   };
 
   const [isControlsVisible, setIsControlsVisible] = useState(true);
+  const iconColor = 'var(--tux-v2-color-ui-shape-text-1-on-primary)';
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const resetControlsTimeout = () => {
@@ -234,31 +236,47 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                     style={videoContainerStyles.topControls}
                   >
                     <div className={videoContainerClasses.topControlsLeft}>
-                      <button 
-                        className={videoContainerClasses.iconBtn}
-                        onClick={() => {
-                          setIsMounting(false);
-                          setEntered(false);
-                          requestAnimationFrame(() => {
-                            setTimeout(() => navigate('/'), EXIT_DURATION);
-                          });
-                        }}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                          <path d="M12.3616 2.95071C12.5243 2.78799 12.7887 2.78799 12.9515 2.95071L13.7171 3.71634C13.8798 3.87906 13.8798 4.14346 13.7171 4.30618L8.02274 10.0005L13.7171 15.6949C13.8797 15.8576 13.8798 16.121 13.7171 16.2837L12.9515 17.0493C12.7887 17.2121 12.5243 17.2121 12.3616 17.0493L5.60673 10.2945C5.44428 10.1318 5.44421 9.86825 5.60673 9.7056L12.3616 2.95071Z" fill="#F6F6F6"/>
-                        </svg>
-                      </button>
-                      <button className={videoContainerClasses.iconBtn}>
-                        <Icons.Volume width={20} height={20} />
-                      </button>
+                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
+                        <TUXIconButton 
+                          size={44}
+                          backgroundColor="transparent"
+                          onClick={() => {
+                            setIsMounting(false);
+                            setEntered(false);
+                            requestAnimationFrame(() => {
+                              setTimeout(() => navigate('/'), EXIT_DURATION);
+                            });
+                          }}
+                          icon={
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                              <path d="M12.3616 2.95071C12.5243 2.78799 12.7887 2.78799 12.9515 2.95071L13.7171 3.71634C13.8798 3.87906 13.8798 4.14346 13.7171 4.30618L8.02274 10.0005L13.7171 15.6949C13.8797 15.8576 13.8798 16.121 13.7171 16.2837L12.9515 17.0493C12.7887 17.2121 12.5243 17.2121 12.3616 17.0493L5.60673 10.2945C5.44428 10.1318 5.44421 9.86825 5.60673 9.7056L12.3616 2.95071Z" fill={iconColor}/>
+                            </svg>
+                          }
+                        />
+                      </div>
+                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
+                        <TUXIconButton 
+                          size={44}
+                          backgroundColor="transparent"
+                          icon={<Icons.Volume width={20} height={20} fill={iconColor} color={iconColor} stroke="transparent" />}
+                        />
+                      </div>
                     </div>
                     <div className={videoContainerClasses.topControlsRight}>
-                      <button className={videoContainerClasses.iconBtn}>
-                        <Icons.Maximize width={20} height={20} />
-                      </button>
-                      <button className={videoContainerClasses.iconBtn}>
-                        <Icons.More width={20} height={20} />
-                      </button>
+                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
+                        <TUXIconButton 
+                          size={44}
+                          backgroundColor="transparent"
+                          icon={<Icons.Maximize width={20} height={20} fill={iconColor} color={iconColor} stroke="transparent" />}
+                        />
+                      </div>
+                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
+                        <TUXIconButton 
+                          size={44}
+                          backgroundColor="transparent"
+                          icon={<Icons.More width={20} height={20} fill={iconColor} color={iconColor} stroke="transparent" />}
+                        />
+                      </div>
                     </div>
                   </div>
 
