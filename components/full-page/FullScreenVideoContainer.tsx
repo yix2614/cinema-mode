@@ -40,6 +40,58 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
   }, [currentIndex]);
 
   const [aspectRatios, setAspectRatios] = useState<Record<number, number>>({});
+  const [resolvedPosters, setResolvedPosters] = useState<Record<string, string>>({});
+  const posterCaptures = useRef(new Set<string>());
+
+  const captureFirstFrame = (url: string): Promise<string | null> => {
+    return new Promise((resolve) => {
+      const video = document.createElement('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'auto';
+      video.crossOrigin = 'anonymous';
+      video.src = url;
+
+      const cleanup = () => {
+        video.removeAttribute('src');
+        video.load();
+      };
+
+      const onError = () => {
+        cleanup();
+        resolve(null);
+      };
+
+      const onLoaded = () => {
+        video.currentTime = 0.1;
+      };
+
+      const onSeeked = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth || 720;
+          canvas.height = video.videoHeight || 1280;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            cleanup();
+            resolve(null);
+            return;
+          }
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          cleanup();
+          resolve(dataUrl);
+        } catch {
+          cleanup();
+          resolve(null);
+        }
+      };
+
+      video.addEventListener('error', onError, { once: true });
+      video.addEventListener('loadeddata', onLoaded, { once: true });
+      video.addEventListener('seeked', onSeeked, { once: true });
+    });
+  };
 
   useEffect(() => {
     videoRefs.current.forEach((ref, index) => {
@@ -141,6 +193,23 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
     }
   }, [visualReady, isMounting]);
 
+  useEffect(() => {
+    let active = true;
+    VIDEO_LIST.forEach((video) => {
+      if (video.poster || resolvedPosters[video.id] || posterCaptures.current.has(video.id)) return;
+      posterCaptures.current.add(video.id);
+      captureFirstFrame(video.url).then((poster) => {
+        if (!active) return;
+        posterCaptures.current.delete(video.id);
+        if (!poster) return;
+        setResolvedPosters((prev) => (prev[video.id] ? prev : { ...prev, [video.id]: poster }));
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [resolvedPosters]);
+
   // Optimize aspect ratio calculation with useMemo if possible, but it depends on state.
   // Instead, prevent frequent updates by checking value.
   const updateAspectRatio = (idx: number, width: number, height: number) => {
@@ -192,7 +261,7 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                     style={videoContainerStyles.ambientInner(ambientScale)}
                 >
                     <AmbientBackground 
-                      posterUrl={video.poster || ''} 
+                      posterUrl={resolvedPosters[video.id] || video.poster || ''} 
                       opacity={ambientOpacity}
                     />
                 </div>
@@ -206,6 +275,7 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                 <video
                     ref={videoRefs.current[idx]}
                     src={video.url}
+                    poster={resolvedPosters[video.id] || video.poster || undefined}
                     className={videoContainerClasses.video}
                     loop
                     muted

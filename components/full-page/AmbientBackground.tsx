@@ -7,6 +7,7 @@ interface AmbientBackgroundProps {
 }
 
 const AmbientBackground: React.FC<AmbientBackgroundProps> = ({ posterUrl, className = '', opacity = 0.40 }) => {
+  if (!posterUrl) return null;
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none -z-10">
         <img
