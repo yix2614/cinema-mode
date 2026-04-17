@@ -1,24 +1,13 @@
 
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { Icons, IconGear } from '../../constants';
+import { Icons } from '../../constants';
 
-interface SidebarProps {
-  onOpenSettings?: () => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
+const Sidebar: React.FC = () => {
   return (
     <aside className="w-[240px] h-full flex flex-col bg-white shrink-0 overflow-y-auto custom-scrollbar">
       {/* Logo Area */}
       <div className="pt-5 pb-5 pl-4">
-        <div
-          className="cursor-pointer hover:opacity-80 transition-opacity w-fit"
-          onClick={() => navigate('/')}
-        >
+        <div className="cursor-pointer hover:opacity-80 transition-opacity w-fit">
           <Icons.TikTok className="h-[28px] w-auto block" />
         </div>
       </div>
@@ -40,15 +29,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onOpenSettings }) => {
       {/* Navigation Items */}
       <div className="flex-1 px-4 py-2">
         <nav className="flex flex-col gap-1">
-          <SidebarItem label="Home" icon={<Icons.Home />} isActive={location.pathname === '/'} onClick={() => navigate('/')} />
+          <SidebarItem label="Home" icon={<Icons.Home />} isActive />
           <SidebarItem label="Shop" icon={<Icons.Shop />} />
           <SidebarItem label="Explore" icon={<Icons.Explore />} />
-          <SidebarItem label="Following" icon={<Icons.Following />} isActive={location.pathname === '/following'} onClick={() => navigate('/following')} />
+          <SidebarItem label="Following" icon={<Icons.Following />} />
           <SidebarItem label="Friends" icon={<Icons.Friends />} />
           <SidebarItem label="LIVE" icon={<Icons.Live />} />
           <SidebarItem label="Messages" icon={<Icons.Messages />} />
           <SidebarItem label="Activity" icon={<Icons.Inbox />} />
-          <SidebarItem label="Settings" icon={<IconGear />} onClick={onOpenSettings} />
         </nav>
       </div>
     </aside>
@@ -59,12 +47,10 @@ interface SidebarItemProps {
   icon: React.ReactNode;
   label: string;
   isActive?: boolean;
-  onClick?: () => void;
 }
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, isActive, onClick }) => (
+const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, isActive }) => (
   <button 
-    onClick={onClick}
     className={`
       flex items-center w-full h-[40px] p-[8px] gap-[16px] rounded-[8px] transition-colors
       ${isActive 
@@ -86,6 +72,12 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, isActive, onClic
       {label}
     </span>
   </button>
+);
+
+const Badge: React.FC<{ count: number }> = ({ count }) => (
+  <div className="bg-[#FE2C55] text-white text-[12px] font-bold px-[6px] h-[16px] flex items-center justify-center rounded-full min-w-[16px]">
+    {count}
+  </div>
 );
 
 export default Sidebar;

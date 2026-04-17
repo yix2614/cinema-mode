@@ -12,8 +12,6 @@
     "node": "20.x"
   },
   "dependencies": {
-    "@byted-tiktok/tux-icons": "^2.39.53",
-    "@byted-tiktok/tux-web": "^1.5.5",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^6.23.1"

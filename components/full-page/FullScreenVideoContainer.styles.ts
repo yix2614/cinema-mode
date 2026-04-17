@@ -15,7 +15,7 @@ export const videoContainerClasses = {
   topControls: (isControlsVisible: boolean) => `absolute top-0 left-0 right-0 h-[84px] px-6 flex items-center justify-between z-40 transition-opacity duration-300 pointer-events-none ${isControlsVisible ? 'opacity-100' : 'opacity-0'}`,
   topControlsLeft: "pointer-events-auto flex items-center gap-3",
   topControlsRight: "flex items-center gap-3 pointer-events-auto",
-  iconBtn: "w-[44px] h-[44px] rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 active:scale-95 transition-all isolate overflow-hidden tux-button-border-fix",
+  iconBtn: "w-[44px] h-[44px] rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 active:scale-95 transition-all isolate overflow-hidden",
   bottomGradient: "absolute bottom-0 left-0 right-0 h-[108px] pointer-events-none z-10"
 };
 

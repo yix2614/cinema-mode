@@ -18,46 +18,71 @@ const VideoContainer: React.FC<VideoContainerProps> = ({ currentIndex, onNext, o
   const [progress, setProgress] = useState(0); // 0-1
   const [duration, setDuration] = useState(0);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const [blockedIndex, setBlockedIndex] = useState<number | null>(null);
+  const [errorIndex, setErrorIndex] = useState<number | null>(null);
 
   const currentVideo = VIDEO_LIST[currentIndex];
 
   useEffect(() => {
-    // Synchronize video playback: only play the current one, pause others.
+    setBlockedIndex(null);
+    setErrorIndex(null);
+    const cleanups: Array<() => void> = [];
+
     videoRefs.current.forEach((video, index) => {
-      if (video) {
-        if (index === currentIndex) {
-          video.muted = true;
-          video.currentTime = 0;
+      if (!video) return;
+
+      if (index === currentIndex) {
+        video.muted = true;
+        video.currentTime = 0;
+        const attemptPlay = () => {
           const playPromise = video.play();
           if (playPromise !== undefined) {
-            playPromise.catch(() => {});
+            playPromise
+              .then(() => {
+                if (index === currentIndex) {
+                  setBlockedIndex(null);
+                }
+              })
+              .catch(() => {
+                if (index === currentIndex) {
+                  setBlockedIndex(index);
+                }
+              });
           }
-          const onTimeUpdate = () => {
-            if (video.duration && !Number.isNaN(video.duration)) {
-              setDuration(video.duration);
-              setProgress(video.currentTime / video.duration);
-            }
-          };
-          const onLoadedMetadata = () => {
-            if (video.duration && !Number.isNaN(video.duration)) {
-              setDuration(video.duration);
-            }
-          };
-          video.addEventListener('timeupdate', onTimeUpdate);
-          video.addEventListener('loadedmetadata', onLoadedMetadata);
-          // initial snapshot
-          onTimeUpdate();
-          // cleanup for current video when index changes
-          return () => {
-            video.removeEventListener('timeupdate', onTimeUpdate);
-            video.removeEventListener('loadedmetadata', onLoadedMetadata);
-          };
-        } else {
-          video.pause();
-          video.currentTime = 0;
-        }
+        };
+        attemptPlay();
+        const onTimeUpdate = () => {
+          if (video.duration && !Number.isNaN(video.duration)) {
+            setDuration(video.duration);
+            setProgress(video.currentTime / video.duration);
+          }
+        };
+        const onLoadedMetadata = () => {
+          if (video.duration && !Number.isNaN(video.duration)) {
+            setDuration(video.duration);
+          }
+        };
+        const onLoadedData = () => {
+          attemptPlay();
+        };
+        video.addEventListener('timeupdate', onTimeUpdate);
+        video.addEventListener('loadedmetadata', onLoadedMetadata);
+        video.addEventListener('loadeddata', onLoadedData);
+        onTimeUpdate();
+        cleanups.push(() => {
+          video.removeEventListener('timeupdate', onTimeUpdate);
+          video.removeEventListener('loadedmetadata', onLoadedMetadata);
+          video.removeEventListener('loadeddata', onLoadedData);
+        });
+      } else {
+        video.pause();
+        video.currentTime = 0;
       }
     });
+
+    return () => {
+      cleanups.forEach((cleanup) => cleanup());
+    };
   }, [currentIndex]);
 
   const handleNext = () => {
@@ -104,7 +129,7 @@ const VideoContainer: React.FC<VideoContainerProps> = ({ currentIndex, onNext, o
           }}
         >
           {VIDEO_LIST.map((video, idx) => (
-            <div key={video.id} className="w-full h-full shrink-0 bg-black flex items-center justify-center overflow-hidden">
+            <div key={video.id} className="w-full h-full shrink-0 bg-black flex items-center justify-center overflow-hidden relative">
               <video
                 ref={el => { videoRefs.current[idx] = el; }}
                 src={video.url}
@@ -114,7 +139,33 @@ const VideoContainer: React.FC<VideoContainerProps> = ({ currentIndex, onNext, o
                 playsInline
                 preload="auto"
                 onContextMenu={(e) => e.preventDefault()}
+                onError={() => {
+                  if (idx === currentIndex) {
+                    setErrorIndex(idx);
+                  }
+                }}
               />
+              {idx === currentIndex && (blockedIndex === idx || errorIndex === idx) && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+                  <button
+                    className="px-4 py-2 rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/30 active:scale-95 transition-all"
+                    onClick={() => {
+                      const video = videoRefs.current[idx];
+                      if (!video) return;
+                      setErrorIndex(null);
+                      setBlockedIndex(null);
+                      video.muted = true;
+                      video.load();
+                      const playPromise = video.play();
+                      if (playPromise !== undefined) {
+                        playPromise.catch(() => setBlockedIndex(idx));
+                      }
+                    }}
+                  >
+                    点击播放
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

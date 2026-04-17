@@ -96,21 +96,10 @@ export const Icons = {
 
 export const VIDEO_LIST: VideoData[] = [
   {
-    id: 'dance-video',
-    url: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769126952/samples/dance-2.mp4',
-    author: 'Street Vibes',
-    description: 'Caught these moves in the city today. Energy is unmatched! 🕺🔥 #Dance #StreetStyle #Vibes #CityLife',
-    likes: '1.2M',
-    comments: '45.6K',
-    saves: '120K',
-    shares: '32K',
-    timeAgo: '45m ago'
-  },
-  {
     id: 'boiler-room',
-    url: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769128347/ssstik.io__boilerroomtv_1769128318966_odpdxo.mp4',
+    url: 'https://pub-36c8115632e74d30a6c7c587fefccbe4.r2.dev/AQMa8JfU_vdZe_XPDZ0qyvX54SEwYh6oKy_nMJFRe7vA4mDaYdIhODaimgQxr9DA6MYJDiKAGBlHW4ow-KtQ_hEa.mp4',
     author: 'Boiler Room',
-    description: 'Pure energy in the booth. Boiler Room never disappoints. ⚡️🎧 #BoilerRoom #DJSet #TechnoVibes #BoilerRoomLive',
+    description: 'Boiler Room live set highlights. ⚡️🎧 #BoilerRoom #LiveSet',
     likes: '850K',
     comments: '12K',
     saves: '45K',
@@ -118,10 +107,21 @@ export const VIDEO_LIST: VideoData[] = [
     timeAgo: '2h ago'
   },
   {
+    id: 'dance-video',
+    url: 'https://pub-36c8115632e74d30a6c7c587fefccbe4.r2.dev/sushi.mp4',
+    author: 'Street Vibes',
+    description: 'Sushi prep in motion. 🍣 #Sushi #Food',
+    likes: '1.2M',
+    comments: '45.6K',
+    saves: '120K',
+    shares: '32K',
+    timeAgo: '45m ago'
+  },
+  {
     id: 'art-of-pictures',
-    url: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769129310/ssstik.io__artof_pictures_1769129292178_zxswi8.mp4',
+    url: 'https://pub-36c8115632e74d30a6c7c587fefccbe4.r2.dev/ssstik.io_1776036957365%20(1).mp4',
     author: 'Art of Pictures',
-    description: 'Finding beauty in the smallest details. Nature is the ultimate artist. 🎨🌿 #ArtOfNature #Macro #Cinematic #Visuals',
+    description: 'Cinematic nature details. 🎨🌿 #Cinematic #Nature',
     likes: '3.1M',
     comments: '92.4K',
     saves: '540K',
@@ -130,9 +130,9 @@ export const VIDEO_LIST: VideoData[] = [
   },
   {
     id: 'elephants-video',
-    url: 'https://res.cloudinary.com/dkjokhb4w/video/upload/v1769126952/samples/elephants.mp4',
+    url: 'https://pub-36c8115632e74d30a6c7c587fefccbe4.r2.dev/jp.mp4',
     author: 'Wild Life',
-    description: 'Majestic giants in their natural habitat. Truly a sight to behold. 🐘✨ #Nature #Wildlife #Elephants #Safari #Cinematic',
+    description: 'Japan street moments in motion. 🇯🇵✨ #Japan #Travel',
     likes: '4.5M',
     comments: '15.2K',
     saves: '210K',

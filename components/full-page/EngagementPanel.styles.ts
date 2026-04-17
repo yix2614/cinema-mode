@@ -8,8 +8,8 @@ export const engagementPanelClasses = {
   plusIconContainer: "bg-[#FE2C55] rounded-full flex items-center justify-center text-white shadow-sm cursor-pointer hover:scale-110 transition-transform z-10 relative mt-[-12px]",
   musicRecordContainer: "rounded-full bg-black/40 border-2 border-white/50 overflow-hidden animate-spin-slow shadow-lg cursor-pointer shrink-0",
   actionButton: {
-    wrapper: "flex flex-col items-center gap-1 self-stretch shrink-0 tux-button-border-fix",
-    button: "flex justify-center items-center rounded-full transition-all duration-200 isolate overflow-hidden",
+    wrapper: "flex flex-col items-center gap-1 self-stretch shrink-0",
+    button: "flex justify-center items-center rounded-full transition-all duration-200 active:scale-90 hover:brightness-125 isolate overflow-hidden",
     iconWrapper: "flex items-center justify-center text-white fill-current",
     label: (className?: string) => `text-[12px] font-bold text-white drop-shadow-md select-none ${className ?? 'mt-[2px]'}`
   }
@@ -40,10 +40,7 @@ export const engagementPanelStyles = {
       backdropFilter: 'blur(8px)',
       WebkitBackdropFilter: 'blur(8px)',
       backfaceVisibility: 'hidden',
-      WebkitBackfaceVisibility: 'hidden',
-      border: 'none',
-      outline: 'none',
-      boxShadow: 'none'
+      WebkitBackfaceVisibility: 'hidden'
     }),
     iconWrapper: (size: number): React.CSSProperties => ({
       width: size,

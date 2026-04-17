@@ -7,7 +7,6 @@ import FullScreenVideoOverlay from './FullScreenVideoOverlay';
 import AmbientBackground from './AmbientBackground';
 import ProgressBar from './ProgressBar';
 import { videoContainerClasses, videoContainerStyles } from './FullScreenVideoContainer.styles';
-import { TUXIconButton } from '@byted-tiktok/tux-web';
 
 const EASE = 'cubic-bezier(0.25,0,0.25,1)';
 const ENTER_DURATION = 300;
@@ -27,6 +26,8 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
   const [entered, setEntered] = useState(false);
   const [isMounting, setIsMounting] = useState(true);
   const [visualReady, setVisualReady] = useState(false);
+  const [blockedIndex, setBlockedIndex] = useState<number | null>(null);
+  const [errorIndex, setErrorIndex] = useState<number | null>(null);
   const mainStyle = useMemo(() => videoContainerStyles.main(entered, isMounting, ENTER_DURATION, EXIT_DURATION, EASE), [entered, isMounting]);
   
   // Use array of RefObjects to maintain stable refs for AmbientBackground
@@ -40,60 +41,10 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
   }, [currentIndex]);
 
   const [aspectRatios, setAspectRatios] = useState<Record<number, number>>({});
-  const [resolvedPosters, setResolvedPosters] = useState<Record<string, string>>({});
-  const posterCaptures = useRef(new Set<string>());
-
-  const captureFirstFrame = (url: string): Promise<string | null> => {
-    return new Promise((resolve) => {
-      const video = document.createElement('video');
-      video.muted = true;
-      video.playsInline = true;
-      video.preload = 'auto';
-      video.crossOrigin = 'anonymous';
-      video.src = url;
-
-      const cleanup = () => {
-        video.removeAttribute('src');
-        video.load();
-      };
-
-      const onError = () => {
-        cleanup();
-        resolve(null);
-      };
-
-      const onLoaded = () => {
-        video.currentTime = 0.1;
-      };
-
-      const onSeeked = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth || 720;
-          canvas.height = video.videoHeight || 1280;
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            cleanup();
-            resolve(null);
-            return;
-          }
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          cleanup();
-          resolve(dataUrl);
-        } catch {
-          cleanup();
-          resolve(null);
-        }
-      };
-
-      video.addEventListener('error', onError, { once: true });
-      video.addEventListener('loadeddata', onLoaded, { once: true });
-      video.addEventListener('seeked', onSeeked, { once: true });
-    });
-  };
 
   useEffect(() => {
+    setBlockedIndex(null);
+    setErrorIndex(null);
     videoRefs.current.forEach((ref, index) => {
       const video = ref.current;
       if (video) {
@@ -106,7 +57,17 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
           
           const playPromise = video.play();
           if (playPromise !== undefined) {
-            playPromise.catch(() => {});
+            playPromise
+              .then(() => {
+                if (index === currentIndex) {
+                  setBlockedIndex(null);
+                }
+              })
+              .catch(() => {
+                if (index === currentIndex) {
+                  setBlockedIndex(index);
+                }
+              });
           }
         } else {
           video.pause();
@@ -153,7 +114,6 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
   };
 
   const [isControlsVisible, setIsControlsVisible] = useState(true);
-  const iconColor = 'var(--tux-v2-color-ui-shape-text-1-on-primary)';
   const controlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const resetControlsTimeout = () => {
@@ -192,23 +152,6 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
       });
     }
   }, [visualReady, isMounting]);
-
-  useEffect(() => {
-    let active = true;
-    VIDEO_LIST.forEach((video) => {
-      if (video.poster || resolvedPosters[video.id] || posterCaptures.current.has(video.id)) return;
-      posterCaptures.current.add(video.id);
-      captureFirstFrame(video.url).then((poster) => {
-        if (!active) return;
-        posterCaptures.current.delete(video.id);
-        if (!poster) return;
-        setResolvedPosters((prev) => (prev[video.id] ? prev : { ...prev, [video.id]: poster }));
-      });
-    });
-    return () => {
-      active = false;
-    };
-  }, [resolvedPosters]);
 
   // Optimize aspect ratio calculation with useMemo if possible, but it depends on state.
   // Instead, prevent frequent updates by checking value.
@@ -261,7 +204,7 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                     style={videoContainerStyles.ambientInner(ambientScale)}
                 >
                     <AmbientBackground 
-                      posterUrl={resolvedPosters[video.id] || video.poster || ''} 
+                      posterUrl={video.poster || ''} 
                       opacity={ambientOpacity}
                     />
                 </div>
@@ -275,7 +218,6 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                 <video
                     ref={videoRefs.current[idx]}
                     src={video.url}
-                    poster={resolvedPosters[video.id] || video.poster || undefined}
                     className={videoContainerClasses.video}
                     loop
                     muted
@@ -287,6 +229,16 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                         setCurrentTime(e.currentTarget.currentTime);
                     }
                     }}
+                    onLoadedData={(e) => {
+                      if (idx === currentIndex) {
+                        const playPromise = e.currentTarget.play();
+                        if (playPromise !== undefined) {
+                          playPromise
+                            .then(() => setBlockedIndex(null))
+                            .catch(() => setBlockedIndex(idx));
+                        }
+                      }
+                    }}
                     onLoadedMetadata={(e) => {
                       updateAspectRatio(idx, e.currentTarget.videoWidth, e.currentTarget.videoHeight);
                       if (idx === currentIndex) {
@@ -294,7 +246,33 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                           setVisualReady(true);
                       }
                     }}
+                    onError={() => {
+                      if (idx === currentIndex) {
+                        setErrorIndex(idx);
+                      }
+                    }}
                 />
+                {idx === currentIndex && (blockedIndex === idx || errorIndex === idx) && (
+                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/40">
+                    <button
+                      className="px-4 py-2 rounded-full bg-white/20 text-white backdrop-blur-md hover:bg-white/30 active:scale-95 transition-all"
+                      onClick={() => {
+                        const video = videoRefs.current[idx].current;
+                        if (!video) return;
+                        setErrorIndex(null);
+                        setBlockedIndex(null);
+                        video.muted = true;
+                        video.load();
+                        const playPromise = video.play();
+                        if (playPromise !== undefined) {
+                          playPromise.catch(() => setBlockedIndex(idx));
+                        }
+                      }}
+                    >
+                      点击播放
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Slide-scoped overlays: description, engagement, progress bar */}
@@ -306,47 +284,31 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                     style={videoContainerStyles.topControls}
                   >
                     <div className={videoContainerClasses.topControlsLeft}>
-                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
-                        <TUXIconButton 
-                          size={44}
-                          backgroundColor="transparent"
-                          onClick={() => {
-                            setIsMounting(false);
-                            setEntered(false);
-                            requestAnimationFrame(() => {
-                              setTimeout(() => navigate('/'), EXIT_DURATION);
-                            });
-                          }}
-                          icon={
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                              <path d="M12.3616 2.95071C12.5243 2.78799 12.7887 2.78799 12.9515 2.95071L13.7171 3.71634C13.8798 3.87906 13.8798 4.14346 13.7171 4.30618L8.02274 10.0005L13.7171 15.6949C13.8797 15.8576 13.8798 16.121 13.7171 16.2837L12.9515 17.0493C12.7887 17.2121 12.5243 17.2121 12.3616 17.0493L5.60673 10.2945C5.44428 10.1318 5.44421 9.86825 5.60673 9.7056L12.3616 2.95071Z" fill={iconColor}/>
-                            </svg>
-                          }
-                        />
-                      </div>
-                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
-                        <TUXIconButton 
-                          size={44}
-                          backgroundColor="transparent"
-                          icon={<Icons.Volume width={20} height={20} fill={iconColor} color={iconColor} stroke="transparent" />}
-                        />
-                      </div>
+                      <button 
+                        className={videoContainerClasses.iconBtn}
+                        onClick={() => {
+                          setIsMounting(false);
+                          setEntered(false);
+                          requestAnimationFrame(() => {
+                            setTimeout(() => navigate('/'), EXIT_DURATION);
+                          });
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path d="M12.3616 2.95071C12.5243 2.78799 12.7887 2.78799 12.9515 2.95071L13.7171 3.71634C13.8798 3.87906 13.8798 4.14346 13.7171 4.30618L8.02274 10.0005L13.7171 15.6949C13.8797 15.8576 13.8798 16.121 13.7171 16.2837L12.9515 17.0493C12.7887 17.2121 12.5243 17.2121 12.3616 17.0493L5.60673 10.2945C5.44428 10.1318 5.44421 9.86825 5.60673 9.7056L12.3616 2.95071Z" fill="#F6F6F6"/>
+                        </svg>
+                      </button>
+                      <button className={videoContainerClasses.iconBtn}>
+                        <Icons.Volume width={20} height={20} />
+                      </button>
                     </div>
                     <div className={videoContainerClasses.topControlsRight}>
-                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
-                        <TUXIconButton 
-                          size={44}
-                          backgroundColor="transparent"
-                          icon={<Icons.Maximize width={20} height={20} fill={iconColor} color={iconColor} stroke="transparent" />}
-                        />
-                      </div>
-                      <div className={`${videoContainerClasses.iconBtn} tux-button-border-fix`} style={{ padding: 0 }}>
-                        <TUXIconButton 
-                          size={44}
-                          backgroundColor="transparent"
-                          icon={<Icons.More width={20} height={20} fill={iconColor} color={iconColor} stroke="transparent" />}
-                        />
-                      </div>
+                      <button className={videoContainerClasses.iconBtn}>
+                        <Icons.Maximize width={20} height={20} />
+                      </button>
+                      <button className={videoContainerClasses.iconBtn}>
+                        <Icons.More width={20} height={20} />
+                      </button>
                     </div>
                   </div>
 
