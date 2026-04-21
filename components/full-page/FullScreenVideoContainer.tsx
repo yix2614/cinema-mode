@@ -205,6 +205,7 @@ const FullScreenVideoContainer: React.FC<FullScreenVideoContainerProps> = ({ onT
                 >
                     <AmbientBackground 
                       posterUrl={video.poster || ''} 
+                      videoUrl={video.url}
                       opacity={ambientOpacity}
                     />
                 </div>
